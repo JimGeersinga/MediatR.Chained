@@ -1,0 +1,39 @@
+name: Release to NuGet
+
+on:
+  release: 
+    types: [published]
+
+jobs:
+  builds:
+
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        project:
+          - MediatR.Chained
+          - MediatR.Chained.EntityFrameworkCore
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Pack
+      run: dotnet pack ${{ matrix.project }} -c Release /p:Version=${{ github.event.release.tag_name }} -o ./nupkg 
+
+    - name: Upload NuGet Package as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.project }}
+        path: ./nupkg/*.nupkg
+
+    - name: Publish to NuGet
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
