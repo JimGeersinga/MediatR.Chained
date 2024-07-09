@@ -25,7 +25,13 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Pack
-      run: dotnet pack ${{ matrix.project }} -c Release -o ./nupkg
+      run: dotnet pack ${{ matrix.project }} -c Release /p:Version=${{ github.event.release.tag_name }} -o ./nupkg 
+
+    - name: Upload NuGet Package as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.project }}
+        path: ./nupkg/*.nupkg
 
     - name: Publish to NuGet
       env:
