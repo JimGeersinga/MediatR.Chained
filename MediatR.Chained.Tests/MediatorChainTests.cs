@@ -67,7 +67,7 @@ public class MediatorChainTests
         result.Should().BeNull();
 
         nextChain.Should().NotBeNull();
-        nextChain.Should().BeOfType<MediatorChain<TestRequest>>();
+        nextChain.Should().BeOfType<MediatorChain<TestResponse>>();
     }
 
     [Fact]
