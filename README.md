@@ -1,6 +1,5 @@
 
 [![CI Pipeline](https://github.com/JimGeersinga/MediatR.Chained/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/JimGeersinga/MediatR.ChainedT/actions/workflows/ci-pipeline.yml)
-[![CD Pipeline](https://github.com/JimGeersinga/MediatR.Chained/actions/workflows/cd-pipeline.yml/badge.svg)](https://github.com/JimGeersinga/MediatR.ChainedT/actions/workflows/cd-pipeline.yml)
 
 # MediatR.Chained
 
