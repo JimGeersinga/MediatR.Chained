@@ -27,7 +27,7 @@ public class MediatorChain(IMediator mediator, List<Func<object, Task<object?>>>
     /// <typeparam name="TNext">The type of the next request in the chain.</typeparam>
     /// <param name="request">The function that creates the request based on the previous result.</param>
     /// <returns>The next mediator chain with the added request.</returns>
-    public IMediatorChain<TNext> AddRequest<TPrevious, TNext>(Func<TPrevious, IRequest<TNext>> request)
+    public IMediatorChain<TNext> Add<TPrevious, TNext>(Func<TPrevious, IRequest<TNext>> request)
     {
         steps.Add(async prevResult => await mediator.Send(request((TPrevious)prevResult)));
         return new MediatorChain<TNext>(mediator, steps!);

@@ -81,7 +81,7 @@ public class MediatorChainTests
         TestRequest request = new();
 
         // Act
-        IMediatorChain<TestResponse> nextChain = chain.AddRequest<TestRequest, TestResponse>(prevResult => new TestRequest());
+        IMediatorChain<TestResponse> nextChain = chain.Add<TestRequest, TestResponse>(prevResult => new TestRequest());
 
         // Assert
         steps.Should().HaveCount(1);
