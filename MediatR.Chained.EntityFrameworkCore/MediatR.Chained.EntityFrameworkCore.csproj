@@ -4,6 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Company></Company>
+    <Authors>JimGeersinga</Authors>
+    <Description>Create and execute a chain of commands or requests sequentially within a DbContext transaction</Description>
+    <RepositoryUrl>https://github.com/JimGeersinga/MediatR.Chained</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/JimGeersinga/MediatR.Chained</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
