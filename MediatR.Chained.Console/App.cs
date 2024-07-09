@@ -12,7 +12,7 @@ internal class App(IMediator mediator)
 
         Console.WriteLine("Chained:");
 
-        await mediator.Chain()
+        await mediator
             .Add(new TestCommand1("Hello"))
             .Add(x => new TestCommand2(x, "World"))
             .Add(x => new TestCommand3(x.Item1, x.Item2, "Again"))
