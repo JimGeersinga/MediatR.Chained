@@ -1,4 +1,5 @@
-name: CD - Pipeline
+name: Release to NuGet
+
 on:
   release: 
     types: [published]
