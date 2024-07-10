@@ -1,7 +1,7 @@
 
 [![CI Pipeline](https://github.com/JimGeersinga/MediatR.Chained/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/JimGeersinga/MediatR.ChainedT/actions/workflows/ci-pipeline.yml)
 
-
+Documentation will be added soon...
 
 # MediatR.Chained
 
@@ -10,6 +10,12 @@
 
 ## Overview
 The `MediatorChain` class is a part of the MediatR.Chained library and is used to create and execute a chain of commands or requests sequentially. It provides a fluent interface for adding requests to the chain and executing them asynchronously.
+
+## Installation
+You can install the MediatR.Chained library via NuGet. Run the following command in the NuGet Package Manager Console:
+```bash 
+dotnet add package MediatR.Chained
+```
 
 ## Usage
 To use the `MediatorChain` class, follow these steps:
@@ -29,11 +35,7 @@ To use the `MediatorChain` class, follow these steps:
 Here's an example of how to use the `MediatorChain` class:
 ![image](https://github.com/JimGeersinga/MediatR.Chained/assets/7780260/bb9421c4-0172-4623-8778-31c525a5516c)
 
-## Installation
-You can install the MediatR.Chained library via NuGet. Run the following command in the NuGet Package Manager Console:
-```bash 
-dotnet add package MediatR.Chained
-```
+
 
 
 
@@ -46,8 +48,11 @@ dotnet add package MediatR.Chained
 ## Installation
 You can install the MediatR.Chained.EntityFrameworkCore library via NuGet. Run the following command in the NuGet Package Manager Console:
 ```bash 
-dotnet add package MediatR.Chained
+dotnet add package MediatR.Chained.EntityFrameworkCore
 ```
+
+## Usage
+coming soon...
 
 
 # License
