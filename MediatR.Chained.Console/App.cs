@@ -22,7 +22,7 @@ internal class App(IMediator mediator)
 
         Console.WriteLine("Chained:");
 
-        var result = await mediator
+        var result = await mediator.Chain<IErrorOr>()
             .Add(new TestCommand1("Hello"))
             .Add(x => new TestCommand2(x.Value, "World"))
             .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"))

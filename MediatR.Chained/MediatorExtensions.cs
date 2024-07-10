@@ -14,4 +14,9 @@ public static class MediatorExtensions
         MediatorChain mediatorChain = new(mediator, []);
         return mediatorChain.Add(request);
     }
+
+    public static IMediatorChain<BaseType> Chain<BaseType>(this IMediator mediator)
+    {
+        return new MediatorChain<BaseType>(mediator, []);
+    }
 }
