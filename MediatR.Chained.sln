@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Chained.Console", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Chained.Tests", "MediatR.Chained.Tests\MediatR.Chained.Tests.csproj", "{B03C4824-5375-4E34-9634-1B0A32E2A406}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Chained.EntityFrameworkCore", "MediatR.Chained.EntityFrameworkCore\MediatR.Chained.EntityFrameworkCore.csproj", "{7471DC08-6657-4ADD-B9E7-D85EA29C1183}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Chained.EntityFrameworkCore", "MediatR.Chained.EntityFrameworkCore\MediatR.Chained.EntityFrameworkCore.csproj", "{7471DC08-6657-4ADD-B9E7-D85EA29C1183}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{81A4DED0-5DAC-4B15-BC82-C2275C3ABDEE}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
