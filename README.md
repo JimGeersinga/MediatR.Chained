@@ -27,12 +27,14 @@ To use the `MediatorChain` class, follow these steps:
    - The second overload returns the response as an object.
 
 Here's an example of how to use the `MediatorChain` class:
+![image](https://github.com/JimGeersinga/MediatR.Chained/assets/7780260/bb9421c4-0172-4623-8778-31c525a5516c)
 
 ## Installation
 You can install the MediatR.Chained library via NuGet. Run the following command in the NuGet Package Manager Console:
 ```bash 
 dotnet add package MediatR.Chained
 ```
+
 
 
 
