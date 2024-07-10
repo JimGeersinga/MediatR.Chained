@@ -6,7 +6,7 @@
 /// </summary>
 /// <param name="mediator">The mediator instance.</param>
 /// <param name="steps">The list of functions representing the steps in the chain.</param>
-public class MediatorChain(IMediator mediator, List<Func<object, Task<object?>>> steps) : IMediatorChain
+internal class MediatorChain(IMediator mediator, List<MediatorChainStep> steps) : IMediatorChain
 {
     /// <summary>
     /// Adds a request to the chain.
@@ -16,7 +16,9 @@ public class MediatorChain(IMediator mediator, List<Func<object, Task<object?>>>
     /// <returns>The next mediator chain with the added request.</returns>
     public IMediatorChain<TNext> Add<TNext>(IRequest<TNext> request)
     {
-        steps.Add(async _ => await mediator.Send(request));
+        steps.Add(new(
+            MediatorChainStep.StepType.Add,
+            _ => request));
         return new MediatorChain<TNext>(mediator, steps!);
     }
 
@@ -29,26 +31,48 @@ public class MediatorChain(IMediator mediator, List<Func<object, Task<object?>>>
     /// <returns>The next mediator chain with the added request.</returns>
     public IMediatorChain<TNext> Add<TPrevious, TNext>(Func<TPrevious, IRequest<TNext>> request)
     {
-        steps.Add(async prevResult => await mediator.Send(request((TPrevious)prevResult)));
+        steps.Add(new(
+            MediatorChainStep.StepType.Add,
+             prevResult => request((TPrevious)prevResult)));
         return new MediatorChain<TNext>(mediator, steps!);
     }
 
     /// <summary>
-    /// Sends the chain of requests sequentially.
+    /// Sends the chain of requests asynchronously and returns the response of type <typeparamref name="TResponse"/>.
+    /// </summary>
+    /// <typeparam name="TResponse">The type of the response.</typeparam>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The response of type <typeparamref name="TResponse"/>.</returns>
+    public async Task<TResponse?> SendAsync<TResponse>(CancellationToken cancellationToken = default)
+    {
+        object? result = default;
+        foreach (MediatorChainStep step in steps)
+        {
+            if(step.Type == MediatorChainStep.StepType.Add)
+            {
+                object request = step.Predicate(result!);
+                result = await mediator.Send(request, cancellationToken);
+            }
+            else if (step.Type == MediatorChainStep.StepType.FailWhen && (bool?)step.Predicate(result!) == true)
+            {
+                break;
+            }
+        }
+
+        return result is TResponse baseType ? baseType : default;
+    }
+
+    /// <summary>
+    /// Sends the chain of requests asynchronously and returns the response as an object.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The task representing the asynchronous operation.</returns>
-    public async Task SendAsync(CancellationToken cancellationToken = default)
-    {
-        object? result = null;
-        foreach (Func<object, Task<object?>> step in steps)
-        {
-            result = await step(result!);
-        }
-    }
+    /// <returns>The response as an object.</returns>
+    public async Task<object?> SendAsync(CancellationToken cancellationToken = default)
+        => await SendAsync<object?>(cancellationToken);
 }
 
-public class MediatorChain<T>(IMediator mediator, List<Func<object, Task<object?>>> steps) : MediatorChain(mediator, steps), IMediatorChain<T>
+internal class MediatorChain<TPrevious>(IMediator mediator, List<MediatorChainStep> steps)
+    : MediatorChain(mediator, steps), IMediatorChain<TPrevious>
 {
     /// <summary>
     /// Adds a request to the chain with a previous result.
@@ -56,9 +80,24 @@ public class MediatorChain<T>(IMediator mediator, List<Func<object, Task<object?
     /// <typeparam name="TNext">The type of the next request in the chain.</typeparam>
     /// <param name="request">The function that creates the request based on the previous result.</param>
     /// <returns>The next mediator chain with the added request.</returns>
-    public IMediatorChain<TNext> Add<TNext>(Func<T, IRequest<TNext>> request)
+    public IMediatorChain<TNext> Add<TNext>(Func<TPrevious, IRequest<TNext>> request)
     {
-        steps.Add(async prevResult => await mediator.Send(request((T)prevResult)));
+        steps.Add(new(
+            MediatorChainStep.StepType.Add,
+            prevResult => request((TPrevious)prevResult)));
         return new MediatorChain<TNext>(mediator, steps);
+    }
+
+    /// <summary>
+    /// Adds a condition to the chain that fails when the specified predicate returns true.
+    /// </summary>
+    /// <param name="predicate">The predicate function that determines whether the condition is met.</param>
+    /// <returns>The current mediator chain with the added condition.</returns>
+    public IMediatorChain<TPrevious> FailWhen(Func<TPrevious, bool> predicate)
+    {
+        steps.Add(new(
+            MediatorChainStep.StepType.FailWhen,
+            prevResult => predicate((TPrevious)prevResult)));
+        return new MediatorChain<TPrevious>(mediator, steps);
     }
 }
