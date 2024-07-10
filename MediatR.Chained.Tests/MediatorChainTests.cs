@@ -12,7 +12,7 @@ public class MediatorChainTests
         // Arrange
         Mock<IMediator> mediatorMock = new();
         List<Func<object, Task<object?>>> steps = [];
-        MediatorChain chain = new(mediatorMock.Object, steps);
+        MediatorChain<object> chain = new(mediatorMock.Object, steps);
 
         bool step1Executed = false;
         bool step2Executed = false;
@@ -51,12 +51,12 @@ public class MediatorChainTests
         // Arrange
         Mock<IMediator> mediatorMock = new();
         List<Func<object, Task<object?>>> steps = [];
-        MediatorChain chain = new(mediatorMock.Object, steps);
+        MediatorChain<object> chain = new(mediatorMock.Object, steps);
 
         TestRequest request = new();
 
         // Act
-        IMediatorChain<TestResponse> nextChain = chain.Add(request);
+        IMediatorChain<object, TestResponse> nextChain = chain.Add(request);
 
         // Assert
         steps.Should().HaveCount(1);
@@ -76,12 +76,12 @@ public class MediatorChainTests
         // Arrange
         Mock<IMediator> mediatorMock = new();
         List<Func<object, Task<object?>>> steps = [];
-        MediatorChain chain = new(mediatorMock.Object, steps);
+        MediatorChain<object> chain = new(mediatorMock.Object, steps);
 
         TestRequest request = new();
 
         // Act
-        IMediatorChain<TestResponse> nextChain = chain.Add<TestRequest, TestResponse>(prevResult => new TestRequest());
+        IMediatorChain<object, TestResponse> nextChain = chain.Add<TestRequest, TestResponse>(prevResult => new TestRequest());
 
         // Assert
         steps.Should().HaveCount(1);
