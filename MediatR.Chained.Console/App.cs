@@ -15,19 +15,22 @@ internal class App(IMediator mediator)
 
         Console.WriteLine("Chained:");
 
-        IErrorOr? result = await mediator.Chain<IErrorOr>()
+        IErrorOr? result = await mediator
             .Add(new TestCommand1("Hello"))
+            .FailWhen(x => x.IsError)
             .Add(x => new TestCommand2(x.Value, "World"))
             .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"))
             .SendAsync<IErrorOr>();
 
-        Console.WriteLine(result?.IsError);
+        Console.WriteLine(result!.IsError);
 
         object? result2 = await mediator
             .Add(new TestCommand1("Hello"))
             .Add(x => new TestCommand2(x.Value, "World"))
             .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"))
-            .SendAsync<IErrorOr>();
+            .SendAsync();
+
+        Console.WriteLine(result2);
     }
 }
 
@@ -40,7 +43,7 @@ internal class Command1Handler : IRequestHandler<TestCommand1, ErrorOr<string>>
     public async Task<ErrorOr<string>> Handle(TestCommand1 request, CancellationToken cancellationToken)
     {
         Console.WriteLine($"Command1Handler: {request.Param1}");
-        return await Task.FromResult(request.Param1);
+        return await Task.FromResult(Error.Failure("test"));
     }
 }
 

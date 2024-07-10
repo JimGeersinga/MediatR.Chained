@@ -7,21 +7,22 @@ namespace MediatR.Chained;
 public static class MediatorExtensions
 {
     /// <summary>
-    /// Sends the specified mediator chain asynchronously within the context of a database transaction.
+    /// Sends a request through the mediator chain within the specified database transaction.
     /// </summary>
-    /// <param name="mediatorChain">The mediator chain to send.</param>
+    /// <typeparam name="TResponse">The type of the response.</typeparam>
+    /// <param name="mediatorChain">The mediator chain.</param>
     /// <param name="transaction">The database transaction.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task SendAsync<T>(this IMediatorChain<T> mediatorChain, IDbContextTransaction transaction, CancellationToken cancellationToken = default)
+    public static async Task SendAsync<TResponse>(this IMediatorChain mediatorChain, IDbContextTransaction transaction, CancellationToken cancellationToken = default)
     {
-        string savePointName = $"{nameof(IMediatorChain<T>)}_{Guid.NewGuid()}";
+        string savePointName = $"{nameof(IMediatorChain)}_{Guid.NewGuid()}";
 
         await transaction.CreateSavepointAsync(savePointName, cancellationToken);
 
         try
         {
-            await mediatorChain.SendAsync(cancellationToken);
+            await mediatorChain.SendAsync<TResponse>(cancellationToken);
         }
         catch
         {
@@ -33,36 +34,39 @@ public static class MediatorExtensions
     }
 
     /// <summary>
-    /// Sends the specified mediator chain asynchronously within the context of a database facade.
+    /// Sends a request through the mediator chain within a database transaction created from the specified database facade.
     /// </summary>
-    /// <param name="mediatorChain">The mediator chain to send.</param>
+    /// <typeparam name="TResponse">The type of the response.</typeparam>
+    /// <param name="mediatorChain">The mediator chain.</param>
     /// <param name="databaseFacade">The database facade.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task SendAsync<T>(this IMediatorChain<T> mediatorChain, DatabaseFacade databaseFacade, CancellationToken cancellationToken = default)
+    public static async Task SendAsync<TResponse>(this IMediatorChain mediatorChain, DatabaseFacade databaseFacade, CancellationToken cancellationToken = default)
     {
         using IDbContextTransaction transaction = databaseFacade.BeginTransaction();
-        await SendAsync<T>(mediatorChain, transaction, cancellationToken);
+        await SendAsync<TResponse>(mediatorChain, transaction, cancellationToken);
     }
 
     /// <summary>
-    /// Sends the specified mediator chain asynchronously within the context of a DbContext.
+    /// Sends a request through the mediator chain within a database transaction created from the specified DbContext.
     /// </summary>
-    /// <param name="mediatorChain">The mediator chain to send.</param>
+    /// <typeparam name="TResponse">The type of the response.</typeparam>
+    /// <param name="mediatorChain">The mediator chain.</param>
     /// <param name="dbContext">The DbContext.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task SendAsync<T>(this IMediatorChain<T> mediatorChain, DbContext dbContext, CancellationToken cancellationToken = default)
-        => await mediatorChain.SendAsync(dbContext.Database, cancellationToken: cancellationToken);
+    public static async Task SendAsync<TResponse>(this IMediatorChain mediatorChain, DbContext dbContext, CancellationToken cancellationToken = default)
+        => await mediatorChain.SendAsync<TResponse>(dbContext.Database, cancellationToken: cancellationToken);
 
     /// <summary>
-    /// Sends the specified mediator chain asynchronously within the context of a DbContextFactory.
+    /// Sends a request through the mediator chain within a database transaction created from the specified IDbContextFactory.
     /// </summary>
+    /// <typeparam name="TResponse">The type of the response.</typeparam>
     /// <typeparam name="TDbContext">The type of the DbContext.</typeparam>
-    /// <param name="mediatorChain">The mediator chain to send.</param>
-    /// <param name="factory">The DbContextFactory.</param>
+    /// <param name="mediatorChain">The mediator chain.</param>
+    /// <param name="factory">The IDbContextFactory.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task SendAsync<T,TDbContext>(this IMediatorChain<T> mediatorChain, IDbContextFactory<TDbContext> factory, CancellationToken cancellationToken = default) where TDbContext : DbContext
-       => await mediatorChain.SendAsync((await factory.CreateDbContextAsync(cancellationToken)).Database, cancellationToken);
+    public static async Task SendAsync<TResponse, TDbContext>(this IMediatorChain mediatorChain, IDbContextFactory<TDbContext> factory, CancellationToken cancellationToken = default) where TDbContext : DbContext
+       => await mediatorChain.SendAsync<TResponse>((await factory.CreateDbContextAsync(cancellationToken)).Database, cancellationToken);
 }
