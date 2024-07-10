@@ -10,8 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR.Chained.EntityFrameworkCore" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediatR.Chained.EntityFrameworkCore\MediatR.Chained.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,32 +1,45 @@
-﻿using MediatR;
+﻿using ErrorOr;
+
+using MediatR;
 using MediatR.Chained;
+
+using Microsoft.EntityFrameworkCore;
 
 internal class App(IMediator mediator)
 {
     public async Task RunAsync()
     {
+        var dbcontext = new DbContext();
+
+
         Console.WriteLine("Normal:");
+
+        dbcontext.Database.BeginTransaction();
         await mediator.Send(new TestCommand1("Hello"));
         await mediator.Send(new TestCommand2("Hello", "World"));
         await mediator.Send(new TestCommand3("Hello", "World", "Again"));
+        dbcontext.Database.CommitTransaction();
 
         Console.WriteLine("Chained:");
 
-        await mediator
+        var result = await mediator
             .Add(new TestCommand1("Hello"))
-            .Add(x => new TestCommand2(x, "World"))
-            .Add(x => new TestCommand3(x.Item1, x.Item2, "Again"))
+            .Add(x => new TestCommand2(x.Value, "World"))
+            .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"))
             .SendAsync();
+
+
+        Console.WriteLine(result.IsError);
     }
 }
 
-public record TestCommand1(string Param1) : IRequest<string>;
-public record TestCommand2(string Param1, string Param2) : IRequest<(string, string)>;
-public record TestCommand3(string Param1, string Param2, string Param3) : IRequest<(string, string, string)>;
+public record TestCommand1(string Param1) : IRequest<IErrorOr<string>>;
+public record TestCommand2(string Param1, string Param2) : IRequest<IErrorOr<(string, string)>>;
+public record TestCommand3(string Param1, string Param2, string Param3) : IRequest<IErrorOr<(string, string, string)>>;
 
-internal class Command1Handler : IRequestHandler<TestCommand1, string>
+internal class Command1Handler : IRequestHandler<TestCommand1, IErrorOr<string>>
 {
-    public Task<string> Handle(TestCommand1 request, CancellationToken cancellationToken)
+    public Task< IErrorOr<string>> Handle(TestCommand1 request, CancellationToken cancellationToken)
     {
         Console.WriteLine($"Command1Handler: {request.Param1}");
         return Task.FromResult(request.Param1);
