@@ -21,9 +21,9 @@ internal class MediatorChain(IMediator mediator, List<MediatorChainStep> steps) 
         steps.Add(new(
             MediatorChainStep.StepType.Add,
             _ => request));
-        steps.Add(new (
-            MediatorChainStep.StepType.FailWhen, 
-            _ => failCondition));
+        steps.Add(new(
+            MediatorChainStep.StepType.FailWhen,
+            prevResult => failCondition((TNext)prevResult)));
         return new MediatorChain<TNext>(mediator, steps!);
     }
 
@@ -34,14 +34,14 @@ internal class MediatorChain(IMediator mediator, List<MediatorChainStep> steps) 
     /// <typeparam name="TNext">The type of the next request in the chain.</typeparam>
     /// <param name="request">The function that creates the request based on the previous result.</param>
     /// <returns>The next mediator chain with the added request.</returns>
-    public IMediatorChain<TNext> Add<TPrevious, TNext>(Func<TPrevious, IRequest<TNext>> request, Func<TPrevious, bool> failCondition)
+    public IMediatorChain<TNext> Add<TPrevious, TNext>(Func<TPrevious, IRequest<TNext>> request, Func<TNext, bool> failCondition)
     {
         steps.Add(new(
             MediatorChainStep.StepType.Add,
              prevResult => request((TPrevious)prevResult)));
         steps.Add(new(
             MediatorChainStep.StepType.FailWhen,
-            _ => failCondition));
+            prevResult => failCondition((TNext)prevResult)));
         return new MediatorChain<TNext>(mediator, steps!);
     }
 
@@ -90,14 +90,14 @@ internal class MediatorChain<TPrevious>(IMediator mediator, List<MediatorChainSt
     /// <typeparam name="TNext">The type of the next request in the chain.</typeparam>
     /// <param name="request">The function that creates the request based on the previous result.</param>
     /// <returns>The next mediator chain with the added request.</returns>
-    public IMediatorChain<TNext> Add<TNext>(Func<TPrevious, IRequest<TNext>> request, Func<TPrevious, bool> failCondition)
+    public IMediatorChain<TNext> Add<TNext>(Func<TPrevious, IRequest<TNext>> request, Func<TNext, bool> failCondition)
     {
         steps.Add(new(
             MediatorChainStep.StepType.Add,
             prevResult => request((TPrevious)prevResult)));
         steps.Add(new(
             MediatorChainStep.StepType.FailWhen,
-            _ => failCondition));
+            prevResult => failCondition((TNext)prevResult)));
         return new MediatorChain<TNext>(mediator, steps);
     }
 

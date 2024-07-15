@@ -26,7 +26,7 @@ internal class App(IMediator mediator)
         object? result2 = await mediator
             .Add(new TestCommand1("Hello"), _ => false)
             .Add(x => new TestCommand2(x.Value, "World"), _ => false)
-            .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"), _ => false)
+            .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"), x => false)
             .SendAsync();
 
         Console.WriteLine(result2);
