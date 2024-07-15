@@ -14,15 +14,23 @@ public static class MediatorExtensions
     /// <param name="transaction">The database transaction.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task SendAsync<TResponse>(this IMediatorChain mediatorChain, IDbContextTransaction transaction, CancellationToken cancellationToken = default)
+    public static async Task<TResponse?> SendAsync<TResponse>(this IMediatorChain mediatorChain, IDbContextTransaction transaction, CancellationToken cancellationToken = default)
     {
         string savePointName = $"{nameof(IMediatorChain)}_{Guid.NewGuid()}";
 
         await transaction.CreateSavepointAsync(savePointName, cancellationToken);
 
+        TResponse? response;
+
         try
         {
-            await mediatorChain.SendAsync<TResponse>(cancellationToken);
+            response = await mediatorChain.SendAsync<TResponse>(cancellationToken);
+
+            if (mediatorChain.Failed)
+            {
+                await transaction.RollbackToSavepointAsync(savePointName, cancellationToken);
+                return response;
+            }
         }
         catch
         {
@@ -31,6 +39,8 @@ public static class MediatorExtensions
         }
 
         await transaction.CommitAsync(cancellationToken);
+
+        return response;
     }
 
     /// <summary>
@@ -41,10 +51,10 @@ public static class MediatorExtensions
     /// <param name="databaseFacade">The database facade.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task SendAsync<TResponse>(this IMediatorChain mediatorChain, DatabaseFacade databaseFacade, CancellationToken cancellationToken = default)
+    public static async Task<TResponse?> SendAsync<TResponse>(this IMediatorChain mediatorChain, DatabaseFacade databaseFacade, CancellationToken cancellationToken = default)
     {
         using IDbContextTransaction transaction = databaseFacade.BeginTransaction();
-        await SendAsync<TResponse>(mediatorChain, transaction, cancellationToken);
+        return await SendAsync<TResponse>(mediatorChain, transaction, cancellationToken);
     }
 
     /// <summary>
@@ -55,7 +65,7 @@ public static class MediatorExtensions
     /// <param name="dbContext">The DbContext.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task SendAsync<TResponse>(this IMediatorChain mediatorChain, DbContext dbContext, CancellationToken cancellationToken = default)
+    public static async Task<TResponse?> SendAsync<TResponse>(this IMediatorChain mediatorChain, DbContext dbContext, CancellationToken cancellationToken = default)
         => await mediatorChain.SendAsync<TResponse>(dbContext.Database, cancellationToken: cancellationToken);
 
     /// <summary>
@@ -67,6 +77,6 @@ public static class MediatorExtensions
     /// <param name="factory">The IDbContextFactory.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public static async Task SendAsync<TResponse, TDbContext>(this IMediatorChain mediatorChain, IDbContextFactory<TDbContext> factory, CancellationToken cancellationToken = default) where TDbContext : DbContext
+    public static async Task<TResponse?> SendAsync<TResponse, TDbContext>(this IMediatorChain mediatorChain, IDbContextFactory<TDbContext> factory, CancellationToken cancellationToken = default) where TDbContext : DbContext
        => await mediatorChain.SendAsync<TResponse>((await factory.CreateDbContextAsync(cancellationToken)).Database, cancellationToken);
 }

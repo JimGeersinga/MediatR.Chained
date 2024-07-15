@@ -16,18 +16,17 @@ internal class App(IMediator mediator)
         Console.WriteLine("Chained:");
 
         IErrorOr? result = await mediator
-            .Add(new TestCommand1("Hello"))
-            .FailWhen(x => x.IsError)
-            .Add(x => new TestCommand2(x.Value, "World"))
-            .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"))
+            .Add(new TestCommand1("Hello"), x => x.IsError)
+            .Add(x => new TestCommand2(x.Value, "World"), _ => false)
+            .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"), _ => false)
             .SendAsync<IErrorOr>();
 
         Console.WriteLine(result!.IsError);
 
         object? result2 = await mediator
-            .Add(new TestCommand1("Hello"))
-            .Add(x => new TestCommand2(x.Value, "World"))
-            .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"))
+            .Add(new TestCommand1("Hello"), _ => false)
+            .Add(x => new TestCommand2(x.Value, "World"), _ => false)
+            .Add(x => new TestCommand3(x.Value.Item1, x.Value.Item2, "Again"), _ => false)
             .SendAsync();
 
         Console.WriteLine(result2);

@@ -5,13 +5,16 @@
 /// </summary>
 public interface IMediatorChain
 {
+
+    public bool Failed { get; }
+
     /// <summary>
     /// Adds a request to the mediator chain.
     /// </summary>
     /// <typeparam name="TNext">The type of the next request in the chain.</typeparam>
     /// <param name="request">The request to be added to the chain.</param>
     /// <returns>The mediator chain with the added request.</returns>
-    IMediatorChain<TNext> Add<TNext>(IRequest<TNext> request);
+    IMediatorChain<TNext> Add<TNext>(IRequest<TNext> request, Func<TNext, bool> failCondition);
 
     /// <summary>
     /// Adds a request to the mediator chain using a factory function.
@@ -20,7 +23,7 @@ public interface IMediatorChain
     /// <typeparam name="TNext">The type of the next request in the chain.</typeparam>
     /// <param name="request">The factory function that creates the request to be added to the chain.</param>
     /// <returns>The mediator chain with the added request.</returns>
-    IMediatorChain<TNext> Add<TPrevious, TNext>(Func<TPrevious, IRequest<TNext>> request);
+    IMediatorChain<TNext> Add<TPrevious, TNext>(Func<TPrevious, IRequest<TNext>> request, Func<TPrevious, bool> failCondition);
 
     /// <summary>
     /// Sends the requests in the mediator chain asynchronously and returns the response of type <typeparamref name="TResponse"/>.
@@ -50,7 +53,7 @@ public interface IMediatorChain<TPrevious> : IMediatorChain
     /// <typeparam name="TNext">The type of the next request in the chain.</typeparam>
     /// <param name="request">The factory function that creates the request to be added to the chain.</param>
     /// <returns>The mediator chain with the added request.</returns>
-    IMediatorChain<TNext> Add<TNext>(Func<TPrevious, IRequest<TNext>> request);
+    IMediatorChain<TNext> Add<TNext>(Func<TPrevious, IRequest<TNext>> request, Func<TPrevious, bool> failCondition);
 
     /// <summary>
     /// Adds a condition to the mediator chain that will cause the chain to fail if the condition is met.

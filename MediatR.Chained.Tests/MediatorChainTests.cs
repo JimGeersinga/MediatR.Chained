@@ -17,7 +17,7 @@ public class MediatorChainTests
         SampleRequest1 request = new();
 
         // Act
-        IMediatorChain<SampleResponse1> nextChain = chain.Add(request);
+        IMediatorChain<SampleResponse1> nextChain = chain.Add(request, _ => false);
 
         // Assert
         steps.Should().HaveCount(1);
@@ -39,9 +39,9 @@ public class MediatorChainTests
         SampleResponse1 previousResult = new();
 
         // Act
-        IMediatorChain<SampleResponse1> previouseChain = chain.Add(request1);
+        IMediatorChain<SampleResponse1> previouseChain = chain.Add(request1, _ => false);
 
-        IMediatorChain<SampleResponse2> nextChain = previouseChain.Add(request2);
+        IMediatorChain<SampleResponse2> nextChain = previouseChain.Add(request2, _ => false);
 
         // Assert
         steps.Should().HaveCount(2);
@@ -69,8 +69,8 @@ public class MediatorChainTests
         mediatorMock.Setup(x => x.Send((object)request2, It.IsAny<CancellationToken>()))
             .ReturnsAsync(response2);
 
-        chain.Add(request1);
-        chain.Add(request2);
+        chain.Add(request1, _ => false);
+        chain.Add(request2, _ => false);
 
         // Act
         SampleResponse2? response = await chain.SendAsync<SampleResponse2>();
@@ -100,8 +100,8 @@ public class MediatorChainTests
         mediatorMock.Setup(x => x.Send((object)request2, It.IsAny<CancellationToken>()))
             .ReturnsAsync(response2);
 
-        chain.Add(request1);
-        chain.Add(request2);
+        chain.Add(request1, _ => false);
+        chain.Add(request2, _ => false);
 
         CancellationToken cancellationToken = new();
 
@@ -129,9 +129,9 @@ public class MediatorChainTests
             .ReturnsAsync(response1);
 
         IMediatorChain<SampleResponse2> chain = mediatorMock.Object
-            .Add(request1)
+            .Add(request1, _ => false)
             .FailWhen(_ => true)
-            .Add(request2);
+            .Add(request2, _ => false);
 
         // Act
         SampleResponse1? response = await chain.SendAsync<SampleResponse1>();
